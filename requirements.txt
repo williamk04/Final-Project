@@ -38,3 +38,10 @@ typing-inspect==0.9.0
 typing_extensions==4.15.0
 urllib3==2.5.0
 yarl==1.22.0
+torch
+opencv-python
+flask
+flask-cors
+pandas
+numpy
+firebase-admin

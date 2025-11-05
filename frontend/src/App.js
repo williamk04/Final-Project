@@ -1,28 +1,20 @@
-import { BrowserRouter as Router, Link } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
-import { Navbar, Nav, Container } from "react-bootstrap";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import History from "./pages/History";
+import Navbar from "./components/Navbar";
+import ParkingMap from "./pages/ParkingMap";
 
-function App() {
+export default function App() {
   return (
     <Router>
-      <Navbar bg="dark" variant="dark" expand="lg">
-        <Container>
-          <Navbar.Brand as={Link} to="/">Smart Parking</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link as={Link} to="/">Dashboard</Nav.Link>
-              <Nav.Link as={Link} to="/history">Vehicle History</Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-
-      <Container style={{ marginTop: "20px" }}>
-        <AppRoutes />
-      </Container>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/map" element={<ParkingMap />} />
+      </Routes>
     </Router>
   );
 }
-
-export default App;
