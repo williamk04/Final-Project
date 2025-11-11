@@ -19,6 +19,7 @@ export default function Navbar() {
         <Tab label="Dashboard" value="/dashboard" />
         <Tab label="History" value="/history" />
         <Tab label="Parking Map" value="/map" />
+        <Tab label="Admin Requests" value="/request" />
       </Tabs>
     </Box>
   );

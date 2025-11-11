@@ -23,8 +23,9 @@ class VehicleViewModel extends Notifier<List<VehicleModel>> {
     });
   }
 
+  /// Add a new vehicle (pending)
   Future<void> addVehicle(String plateNumber) async {
-    await _vehicleService.addVehicle(plateNumber);
+    await _vehicleService.addVehicle(plateNumber, status: 'pending');
   }
 
   Future<void> updateVehicle(String id, String newPlateNumber) async {
@@ -35,10 +36,14 @@ class VehicleViewModel extends Notifier<List<VehicleModel>> {
     await _vehicleService.deleteVehicle(id);
   }
 
-  // --- 🆕 Thêm hàm lấy lịch sử xe ---
+  Future<void> updateStatus(String id, String newStatus) async {
+    await _vehicleService.updateStatus(id, newStatus);
+  }
+
+  // --- Get vehicle history ---
   Future<void> fetchVehicleHistories() async {
     isLoading = true;
-    state = [...state]; // trigger rebuild
+    state = [...state];
     try {
       final allHistories = await _vehicleService.getVehicleHistoriesByUser();
       activeSessions = allHistories.where((v) => v.status == 'in').toList();

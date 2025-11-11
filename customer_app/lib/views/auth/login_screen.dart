@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -129,7 +130,7 @@ class LoginScreen extends ConsumerWidget {
                         const Text("Don't have an account? "),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/register');
+                            context.push('/register');
                           },
                           child: const Text(
                             "Register",

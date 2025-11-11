@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../viewmodels/vehicle_viewmodel.dart';
 import '../../models/vehicle_model.dart';
 
@@ -11,7 +12,21 @@ class RegisterVehicleScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicleList = ref.watch(vehicleViewModelProvider);
     final vehicleVM = ref.read(vehicleViewModelProvider.notifier);
+
     final plateController = TextEditingController();
+
+    // Lấy user hiện tại
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid;
+
+    // Lọc danh sách theo user + trạng thái
+    final pendingList = vehicleList
+        .where((v) => v.status == "pending" && v.userId == userId)
+        .toList();
+
+    final registeredList = vehicleList
+        .where((v) => v.status == "approved" && v.userId == userId)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -34,9 +49,7 @@ class RegisterVehicleScreen extends ConsumerWidget {
                 Expanded(
                   child: TextField(
                     controller: plateController,
-                    inputFormatters: [
-                      UpperCaseTextFormatter(), // ✅ luôn viết hoa
-                    ],
+                    inputFormatters: [UpperCaseTextFormatter()],
                     decoration: InputDecoration(
                       labelText: 'Enter license plate',
                       prefixIcon: const Icon(Icons.directions_car),
@@ -53,22 +66,33 @@ class RegisterVehicleScreen extends ConsumerWidget {
                     if (plate.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text("Please enter plate number"),
+                          content: Text("Please enter a plate number."),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                       return;
                     }
 
-                    await vehicleVM.addVehicle(plate);
-                    plateController.clear();
+                    try {
+                      await vehicleVM.addVehicle(plate);
+                      plateController.clear();
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Vehicle added successfully!"),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Vehicle request sent for approval!"),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              e.toString().replaceFirst('Exception: ', '')),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                    }
                   },
                   child: const Text("Add"),
                 ),
@@ -78,20 +102,64 @@ class RegisterVehicleScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 10),
+
+            // Queue - danh sách chờ duyệt
+            const Text(
+              "Queue (Pending Approval)",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: pendingList.isEmpty
+                  ? const Center(
+                      child: Text("No vehicles pending approval."),
+                    )
+                  : ListView.builder(
+                      itemCount: pendingList.length,
+                      itemBuilder: (context, index) {
+                        final v = pendingList[index];
+                        return Card(
+                          color: Colors.orange.shade50,
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          child: ListTile(
+                            leading: const Icon(Icons.timelapse,
+                                color: Colors.orangeAccent),
+                            title: Text(
+                              v.plateNumber,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            subtitle:
+                                const Text("Waiting for admin approval..."),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                _confirmDelete(context, vehicleVM, v.id);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+
+            const Divider(thickness: 1.5),
+            const SizedBox(height: 10),
+
+            // Registered vehicles
             const Text(
               "Registered Vehicles",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 10),
-
-            // Danh sách biển số đã đăng ký
             Expanded(
-              child: vehicleList.isEmpty
-                  ? const Center(child: Text("No vehicles registered yet."))
+              child: registeredList.isEmpty
+                  ? const Center(
+                      child: Text("No vehicles registered yet."),
+                    )
                   : ListView.builder(
-                      itemCount: vehicleList.length,
+                      itemCount: registeredList.length,
                       itemBuilder: (context, index) {
-                        final v = vehicleList[index];
+                        final v = registeredList[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           child: ListTile(
@@ -115,7 +183,7 @@ class RegisterVehicleScreen extends ConsumerWidget {
                                   icon: const Icon(Icons.delete,
                                       color: Colors.red),
                                   onPressed: () {
-                                    _confirmDelete(context, vehicleVM, v.id!);
+                                    _confirmDelete(context, vehicleVM, v.id);
                                   },
                                 ),
                               ],
@@ -155,8 +223,8 @@ class RegisterVehicleScreen extends ConsumerWidget {
               final newPlate = controller.text.trim();
               if (newPlate.isEmpty) return;
 
-              Navigator.pop(context); // đóng dialog trước khi update
-              await vm.updateVehicle(vehicle.id!, newPlate);
+              Navigator.pop(context);
+              await vm.updateVehicle(vehicle.id, newPlate);
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -172,7 +240,7 @@ class RegisterVehicleScreen extends ConsumerWidget {
     );
   }
 
-  // ❌ Hộp thoại xác nhận xóa
+  //  Hộp thoại xác nhận xóa
   void _confirmDelete(BuildContext context, VehicleViewModel vm, String id) {
     showDialog(
       context: context,
@@ -187,7 +255,7 @@ class RegisterVehicleScreen extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              Navigator.pop(context); // đóng dialog trước
+              Navigator.pop(context);
               await vm.deleteVehicle(id);
 
               ScaffoldMessenger.of(context).showSnackBar(

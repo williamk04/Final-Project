@@ -14,7 +14,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ✅ Gọi fetchVehicleHistories() sau khi widget và provider sẵn sàng
+    // ✅ Gọi fetchVehicleHistories() khi widget đã sẵn sàng
     Future.microtask(() async {
       await ref.read(vehicleViewModelProvider.notifier).fetchVehicleHistories();
     });
@@ -22,7 +22,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Watch cả state để Riverpod rebuild khi dữ liệu thay đổi
     final vehicles = ref.watch(vehicleViewModelProvider);
     final vm = ref.watch(vehicleViewModelProvider.notifier);
     final isLoading = vm.isLoading;
@@ -32,12 +31,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : (vm.activeSessions.isEmpty && vm.completedSessions.isEmpty)
-              ? const Center(
-                  child: Text(
-                    "No history found",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                )
+              ? _buildEmptyState(vehicles)
               : RefreshIndicator(
                   onRefresh: () async {
                     await ref
@@ -80,6 +74,32 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     ),
                   ),
                 ),
+    );
+  }
+
+  /// 🆕 Nếu user chưa có xe được duyệt (approved), báo phù hợp
+  Widget _buildEmptyState(List vehicles) {
+    final approvedVehicles =
+        vehicles.where((v) => v.status == 'approved').toList();
+
+    if (approvedVehicles.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            "No approved vehicles yet.\nPlease wait for admin approval to view history.",
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return const Center(
+      child: Text(
+        "No parking history found.",
+        style: TextStyle(fontSize: 16, color: Colors.grey),
+      ),
     );
   }
 

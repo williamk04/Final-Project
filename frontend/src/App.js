@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Navbar from "./components/Navbar";
 import ParkingMap from "./pages/ParkingMap";
+import AdminRequests from "./pages/AdminRequests";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/history" element={<History />} />
         <Route path="/map" element={<ParkingMap />} />
+        <Route path="/request" element={<AdminRequests/>} />
       </Routes>
     </Router>
   );

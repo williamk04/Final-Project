@@ -19,7 +19,6 @@ class AuthViewModel extends Notifier<bool> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Register success!')),
       );
-
       // ✅ Dùng go_router thay vì Navigator
       context.go('/login');
     } catch (e) {
