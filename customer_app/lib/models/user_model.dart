@@ -1,31 +1,46 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
-  final String uid;
-  final String name;
+  final String id; // uid của Firebase Auth
   final String email;
-  final List<String> vehicles;
+  final String? name;
+  final int walletBalance;
+  final int walletDebt;
+  final String? fcmToken;
+  final DateTime createdAt;
 
   UserModel({
-    required this.uid,
-    required this.name,
+    required this.id,
     required this.email,
-    required this.vehicles,
+    required this.name,
+    required this.walletBalance,
+    required this.walletDebt,
+    required this.fcmToken,
+    required this.createdAt,
   });
+
+  factory UserModel.fromMap(String id, Map<String, dynamic> data) {
+    return UserModel(
+      id: id,
+      email: data['email'] ?? '',
+      name: data['name'],
+      walletBalance: (data['wallet_balance'] ?? 0).toInt(),
+      walletDebt: (data['wallet_debt'] ?? 0).toInt(),
+      fcmToken: data['fcmToken'],
+      createdAt: (data['createdAt'] is Timestamp)
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.tryParse(data['createdAt'] ?? '') ?? DateTime.now(),
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
-      'uid': uid,
-      'name': name,
       'email': email,
-      'vehicles': vehicles,
+      'name': name,
+      'wallet_balance': walletBalance,
+      'wallet_debt': walletDebt,
+      'fcmToken': fcmToken,
+      'createdAt': createdAt,
     };
-  }
-
-  factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
-      uid: map['uid'],
-      name: map['name'],
-      email: map['email'],
-      vehicles: List<String>.from(map['vehicles'] ?? []),
-    );
   }
 }

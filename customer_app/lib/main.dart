@@ -23,7 +23,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Vehicle App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      routerConfig: router, // 👈 dùng router của GoRouter
+      routerConfig: router, //  dùng router của GoRouter
     );
   }
 }

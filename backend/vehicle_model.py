@@ -21,3 +21,4 @@ class Vehicle:
         if self.exit_time:
             data["exit_time"] = self.exit_time.isoformat()
         return data
+    

@@ -7,12 +7,10 @@ class VehicleService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // --- 🆕 Add a new vehicle request ---
   Future<void> addVehicle(String plateNumber, {String status = 'pending'}) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
-    // ✅ Check if plate already exists (approved or pending)
     final existing = await _firestore
         .collection('user_plates')
         .where('plateNumber', isEqualTo: plateNumber)
@@ -27,7 +25,6 @@ class VehicleService {
       }
     }
 
-    // ✅ Create a new pending request
     final docRef = _firestore.collection('user_plates').doc();
     final vehicle = VehicleModel(
       id: docRef.id,
@@ -39,7 +36,6 @@ class VehicleService {
     await docRef.set(vehicle.toMap());
   }
 
-  // --- Stream: vehicles of the current user ---
   Stream<List<VehicleModel>> getUserVehicles() {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
@@ -52,36 +48,36 @@ class VehicleService {
             snapshot.docs.map((doc) => VehicleModel.fromMap(doc.data())).toList());
   }
 
-  // --- Update a vehicle plate number ---
+  /// ✅ NEW: Get only approved plates
+  Stream<List<VehicleModel>> getApprovedPlates() {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    return _firestore
+        .collection('user_plates')
+        .where('userId', isEqualTo: user.uid)
+        .where('status', isEqualTo: 'approved')
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => VehicleModel.fromMap(doc.data())).toList());
+  }
+
   Future<void> updateVehicle(String id, String newPlateNumber) async {
     await _firestore.collection('user_plates').doc(id).update({
       'plateNumber': newPlateNumber,
     });
   }
 
-  // --- Delete a vehicle ---
   Future<void> deleteVehicle(String id) async {
     await _firestore.collection('user_plates').doc(id).delete();
   }
 
-  // --- Update vehicle status (used by admin) ---
   Future<void> updateStatus(String id, String newStatus) async {
     await _firestore.collection('user_plates').doc(id).update({
       'status': newStatus,
     });
   }
 
-  // --- Get all pending vehicles (for admin) ---
-  Stream<List<VehicleModel>> getPendingVehicles() {
-    return _firestore
-        .collection('user_plates')
-        .where('status', isEqualTo: 'pending')
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => VehicleModel.fromMap(doc.data())).toList());
-  }
-
-  // --- Get vehicle histories for approved vehicles ---
   Future<List<VehicleHistoryModel>> getVehicleHistoriesByUser() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');

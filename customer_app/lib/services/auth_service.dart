@@ -5,15 +5,28 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// Đăng ký tài khoản mới
   Future<User?> register(String email, String password) async {
     try {
       UserCredential cred = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      await _firestore.collection('users').doc(cred.user!.uid).set({
+        email: email,
+        password: password,
+      );
+
+      final user = cred.user;
+      if (user == null) throw Exception("User creation failed");
+
+      // 🔥 Tạo document user trong Firestore
+      await _firestore.collection('users').doc(user.uid).set({
         'email': email,
-        'createdAt': DateTime.now(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'wallet_balance': 0,
+        'wallet_debt': 0,
+        'fcmToken': null, // sẽ cập nhật sau khi đăng nhập lần đầu
+        'name': null,
       });
-      return cred.user;
+
+      return user;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message);
     }

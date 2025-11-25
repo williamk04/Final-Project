@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:customer_app/views/balance/balance_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,8 +45,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(path: '/plates', builder: (context, state) => const RegisterVehicleScreen()),
 
-      // 🆕 Thêm route mới cho History
+      //  Thêm route mới cho History
       GoRoute(path: '/history', builder: (context, state) => const HistoryScreen()),
+      GoRoute(path: '/balance', builder: (context, state) => const BalancePage()),
     ],
   );
 });

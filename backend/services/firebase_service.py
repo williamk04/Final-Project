@@ -1,87 +1,149 @@
 from firebase_config import db
 from vehicle_model import Vehicle
 from datetime import datetime, timezone
-from firebase_admin import firestore
-def save_vehicle_entry(plate_text, image_url):
-    # KIỂM TRA XE ĐANG Ở TRONG BÃI
-    query = db.collection("vehicles")\
-              .where("license_plate", "==", plate_text)\
-              .where("status", "==", "in")\
-              .limit(1).get()
-    if query:
-        # Trả về None hoặc raise exception tùy bạn xử lý
-        return None, f"Vehicle {plate_text} is already in the parking lot"
 
-    # Nếu chưa có, tạo record mới
-    vehicle = Vehicle(
-        license_plate=plate_text,
-        image_url=image_url,
-        entry_time=datetime.now(timezone.utc),
-        status="in"
-    )
-    doc_ref = db.collection("vehicles").add(vehicle.to_dict())
-    return {"_id": doc_ref[1].id, **vehicle.to_dict()}, None
-
-
-
-
-# Giả sử rate_per_minute là phí mỗi phút (ví dụ 1000 VND)
 RATE_PER_MINUTE = 1000
+OVERTIME_FEE_PER_MIN = 5000
 
-def update_vehicle_exit(plate_text, exit_image_url, rate_per_minute=RATE_PER_MINUTE):
-    
-    # Lấy record vehicle đang 'in'
-    query = db.collection("vehicles")\
-              .where("license_plate", "==", plate_text)\
-              .where("status", "==", "in")\
-              .limit(1).get()
-    
-    if not query:
+def now_dt():
+    return datetime.now(timezone.utc)
+
+def now_iso():
+    return now_dt().isoformat()
+
+def save_vehicle_entry(plate_text, image_url):
+    try:
+        current_dt = now_dt()
+        current_iso = current_dt.isoformat()
+
+        # 1️⃣ Kiểm tra xe đang trong bãi
+        existing = db.collection("vehicles") \
+            .where("license_plate", "==", plate_text) \
+            .where("status", "==", "in") \
+            .limit(1).get()
+        if existing:
+            return None, f"Vehicle {plate_text} already inside"
+
+        # 2️⃣ Kiểm tra reservation hợp lệ
+        reservations = db.collection("reservations") \
+            .where("plateNumber", "==", plate_text) \
+            .where("status", "==", "reserved") \
+            .limit(10).get()
+
+        active_res = None
+        for r in reservations:
+            res_data = r.to_dict()
+            start_dt = res_data["startTime"]  # DatetimeWithNanoseconds
+            end_dt = res_data["endTime"]
+
+            if start_dt <= current_dt <= end_dt:
+                active_res = (r.id, res_data)
+                break
+
+        if active_res:
+            res_id, res_data = active_res
+            db.collection("reservations").document(res_id).update({
+                "status": "checked_in",
+                "checkInTime": current_iso
+            })
+
+            vehicle = Vehicle(
+                license_plate=plate_text,
+                image_url=image_url,
+                entry_time=current_dt,
+                status="in"
+            )
+            data = vehicle.to_dict()
+            data.update({
+                "entry_time": current_iso,
+                "is_reserved": True,
+                "reservation_id": res_id
+            })
+            doc_ref = db.collection("vehicles").add(data)[1]
+            return {"_id": doc_ref.id, **data}, None
+
+        # 3️⃣ Xe vãng lai
+        vehicle = Vehicle(
+            license_plate=plate_text,
+            image_url=image_url,
+            entry_time=current_dt,
+            status="in"
+        )
+        data = vehicle.to_dict()
+        data.update({
+            "entry_time": current_iso,
+            "is_reserved": False
+        })
+        doc_ref = db.collection("vehicles").add(data)[1]
+        return {"_id": doc_ref.id, **data}, None
+
+    except Exception as e:
+        print("save_vehicle_entry error:", e)
+        return None, str(e)
+
+def update_vehicle_exit(plate_text, exit_image_url):
+    try:
+        current_dt = now_dt()
+        current_iso = current_dt.isoformat()
+
+        query = db.collection("vehicles") \
+            .where("license_plate", "==", plate_text) \
+            .where("status", "==", "in") \
+            .limit(1).get()
+        if not query:
+            return None
+
+        doc = query[0]
+        data = doc.to_dict()
+
+        entry_dt = datetime.fromisoformat(data["entry_time"].replace("Z", "+00:00"))
+        duration_minutes = int((current_dt - entry_dt).total_seconds() / 60)
+
+        # --- Xe đặt chỗ ---
+        if data.get("is_reserved") and data.get("reservation_id"):
+            res_id = data["reservation_id"]
+            res_ref = db.collection("reservations").document(res_id)
+            res_doc = res_ref.get()
+
+            if res_doc.exists:
+                res = res_doc.to_dict()
+                end_dt = res["endTime"]  # trực tiếp so sánh với datetime
+
+                overtime = max(0, int((current_dt - end_dt).total_seconds() / 60) - 5)
+                overtime_fee = overtime * OVERTIME_FEE_PER_MIN
+
+                res_ref.update({
+                    "status": "checked_out",
+                    "checkOutTime": current_iso,
+                    "overtimeFee": overtime_fee,
+                    "actualTotalFee": res.get("paidFee", 0) + overtime_fee
+                })
+        else:
+            # --- Xe vãng lai ---
+            fee = duration_minutes * RATE_PER_MINUTE
+            doc.reference.update({"fee": fee})
+
+        doc.reference.update({
+            "status": "out",
+            "exit_time": current_iso,
+            "exit_image_url": exit_image_url,
+            "duration_minutes": duration_minutes
+        })
+
+        data.update({
+            "status": "out",
+            "exit_time": current_iso,
+            "exit_image_url": exit_image_url,
+            "duration_minutes": duration_minutes
+        })
+        return {"_id": doc.id, **data}
+
+    except Exception as e:
+        print("update_vehicle_exit error:", e)
         return None
-    
-    doc = query[0]
-    data = doc.to_dict()
-
-    # Lấy entry_time từ Firestore
-    entry_time_str = data.get("entry_time")
-    if not entry_time_str:
-        return None  # không có entry_time, không thể tính duration
-
-    # Chuyển entry_time từ ISO string sang datetime
-    entry_time = datetime.fromisoformat(entry_time_str)
-
-    # Tính duration (phút)
-    now = datetime.now(timezone.utc)
-    duration_minutes = int((now - entry_time).total_seconds() / 60)
-
-    # Tính phí
-    fee = duration_minutes * rate_per_minute
-
-    # Cập nhật Firestore
-    doc.reference.update({
-        "status": "out",
-        "exit_image_url": exit_image_url,
-        "exit_time": now.isoformat(),
-        "duration_minutes": duration_minutes,
-        "fee": fee
-    })
-
-    # Trả về record mới
-    updated_data = doc.to_dict()
-    updated_data.update({
-        "exit_time": now.isoformat(),
-        "duration_minutes": duration_minutes,
-        "fee": fee,
-        "exit_image_url": exit_image_url,
-        "status": "out"
-    })
-    return {"_id": doc.id, **updated_data}
 
 def get_all_vehicle_records():
-    db = firestore.client()
-    docs = db.collection("vehicles").stream()
     vehicles = []
-    for doc in docs:
-        v = doc.to_dict()
-        vehicles.append(v)
+    for doc in db.collection("vehicles").stream():
+        vehicles.append(doc.to_dict())
     return vehicles
