@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 RATE_PER_MINUTE = 1000
 OVERTIME_FEE_PER_MIN = 5000
-GRACE_PERIOD = 5  # phút
+GRACE_PERIOD = 5  # minutes
 
 
 def now_dt():
@@ -16,7 +16,7 @@ def now_iso():
 
 
 # ====================================================================
-# 1) LƯU XE VÀO — CHECK-IN
+# 1) VEHICLE ENTRY — CHECK-IN
 # ====================================================================
 
 def save_vehicle_entry(plate_text, image_url):
@@ -25,7 +25,7 @@ def save_vehicle_entry(plate_text, image_url):
         current_iso = now_iso()
 
         # -------------------------------------------------------
-        # 1. Kiểm tra xe có đang trong bãi không
+        # 1. Check if the vehicle is already inside
         # -------------------------------------------------------
         existing = db.collection("vehicles") \
             .where("license_plate", "==", plate_text) \
@@ -33,10 +33,10 @@ def save_vehicle_entry(plate_text, image_url):
             .limit(1).get()
 
         if existing:
-            return None, f"Vehicle {plate_text} already inside"
+            return None, f"Vehicle {plate_text} is already inside"
 
         # -------------------------------------------------------
-        # 2. Kiểm tra reservation
+        # 2. Check reservation
         # -------------------------------------------------------
         reservations = db.collection("reservations") \
             .where("plateNumber", "==", plate_text) \
@@ -58,14 +58,14 @@ def save_vehicle_entry(plate_text, image_url):
                 break
 
         # -------------------------------------------------------
-        # 3. XE ĐẶT CHỖ — CHECK IN
+        # 3. RESERVED VEHICLE — CHECK IN
         # -------------------------------------------------------
         if active_res:
             res_id, res_data = active_res
-            target_slot = res_data["slotId"]  # ví dụ: "A4"
+            target_slot = res_data["slotId"]  # e.g., "A4"
 
             # ============================================
-            # KIỂM TRA SLOT ĐẶT HIỆN TẠI CÓ BỊ CHIẾM KHÔNG
+            # CHECK IF THE RESERVED SLOT IS OCCUPIED
             # ============================================
             occupying = db.collection("reservations") \
                 .where("slotId", "==", target_slot) \
@@ -78,12 +78,12 @@ def save_vehicle_entry(plate_text, image_url):
                 occ = occupying[0].to_dict()
                 end_dt = occ["endTime"]
 
-                # Nếu xe kia hết giờ nhưng chưa check out → vẫn chiếm
+                # If the other vehicle’s reservation has ended but not checked out → still occupies
                 if end_dt < current_dt:
                     slot_occupied = True
 
             # -------------------------------------------------------
-            # Nếu slot bị chiếm → tự động tìm slot khác
+            # If slot is occupied → automatically find another slot
             # -------------------------------------------------------
             if slot_occupied:
                 free_slot = None
@@ -97,7 +97,7 @@ def save_vehicle_entry(plate_text, image_url):
                     if slot_name == target_slot:
                         continue
 
-                    # kiểm tra slot này có ai đang checked-in không
+                    # check if anyone is currently checked-in in this slot
                     check = db.collection("reservations") \
                         .where("slotId", "==", slot_name) \
                         .where("status", "==", "checked_in") \
@@ -108,7 +108,7 @@ def save_vehicle_entry(plate_text, image_url):
                         break
 
                 # -----------------------------------------------
-                # KHÔNG CÓ SLOT TRỐNG → HUỶ RESERVATION + HOÀN TIỀN VÀO VÍ USER
+                # NO FREE SLOT → CANCEL RESERVATION + REFUND TO USER WALLET
                 # -----------------------------------------------
                 if not free_slot:
                     refund_amount = res_data.get("paidFee", 0)
@@ -128,7 +128,7 @@ def save_vehicle_entry(plate_text, image_url):
                             current_balance = user_data.get("wallet_balance", 0) or 0
                             new_balance = current_balance + refund_amount
 
-                            # cập nhật wallet_balance
+                            # update wallet_balance
                             user_ref.update({
                                 "wallet_balance": new_balance
                             })
@@ -139,7 +139,7 @@ def save_vehicle_entry(plate_text, image_url):
                     else:
                         print(f"[REFUND ERROR] Reservation {res_id} missing userId → cannot refund wallet")
 
-                    # cập nhật reservation: failed + ghi refund info
+                    # update reservation: failed + record refund info
                     db.collection("reservations").document(res_id).update({
                         "status": "failed",
                         "refundAmount": refund_amount,
@@ -148,7 +148,7 @@ def save_vehicle_entry(plate_text, image_url):
                         "refunded": refunded_to_wallet
                     })
 
-                    # trả về thông báo lỗi cùng thông tin refund
+                    # return error message with refund info
                     if refunded_to_wallet:
                         return None, (
                             f"Slot {target_slot} is occupied and no free slots available. "
@@ -160,7 +160,7 @@ def save_vehicle_entry(plate_text, image_url):
                             f"Reservation marked failed and refund requested ({refund_amount} VND) but wallet update failed."
                         )
 
-                # Nếu có free_slot thì cập nhật reservation sang slot mới
+                # If a free slot exists, update reservation to new slot
                 db.collection("reservations").document(res_id).update({
                     "slotId": free_slot
                 })
@@ -169,7 +169,7 @@ def save_vehicle_entry(plate_text, image_url):
                 target_slot = free_slot
 
             # ============================================
-            #  TIẾN HÀNH CHECK-IN BÌNH THƯỜNG
+            # NORMAL CHECK-IN
             # ============================================
 
             db.collection("reservations").document(res_id).update({
@@ -196,7 +196,7 @@ def save_vehicle_entry(plate_text, image_url):
             return {"_id": doc_ref.id, **data}, None
 
         # -------------------------------------------------------
-        # 4. XE VÃNG LAI
+        # 4. WALK-IN VEHICLE
         # -------------------------------------------------------
         vehicle = Vehicle(
             license_plate=plate_text,
@@ -219,7 +219,7 @@ def save_vehicle_entry(plate_text, image_url):
 
 
 # ====================================================================
-# 2) XE RA — CHECK-OUT
+# 2) VEHICLE EXIT — CHECK-OUT
 # ====================================================================
 
 def update_vehicle_exit(plate_text, exit_image_url):
@@ -245,7 +245,7 @@ def update_vehicle_exit(plate_text, exit_image_url):
         duration_minutes = int((current_dt - entry_dt).total_seconds() / 60)
 
         # -------------------------------------------------------
-        # XE ĐẶT CHỖ
+        # RESERVED VEHICLE
         # -------------------------------------------------------
         if data.get("is_reserved") and data.get("reservation_id"):
             res_id = data["reservation_id"]
@@ -286,7 +286,7 @@ def update_vehicle_exit(plate_text, exit_image_url):
             }
 
         # -------------------------------------------------------
-        # XE VÃNG LAI
+        # WALK-IN VEHICLE
         # -------------------------------------------------------
         fee = duration_minutes * RATE_PER_MINUTE
 
@@ -312,7 +312,7 @@ def update_vehicle_exit(plate_text, exit_image_url):
 
 
 # ====================================================================
-# 3) LẤY TẤT CẢ BẢN GHI XE
+# 3) GET ALL VEHICLE RECORDS
 # ====================================================================
 
 def get_all_vehicle_records():
