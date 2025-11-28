@@ -1,16 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
-
-const slots = [
-  { id: "A1", status: "free" },
-  { id: "A2", status: "occupied" },
-  { id: "A3", status: "free" },
-  { id: "A4", status: "occupied" },
-  { id: "A5", status: "free" },
-  { id: "A6", status: "free" },
-];
+import { db } from "../firebaseConfig";
+import { collection, onSnapshot } from "firebase/firestore";
 
 const ParkingMap = () => {
+  const [slots, setSlots] = useState([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "parking_slots"), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,     // A1, A2, A3...
+        ...doc.data(),  // status: "free" | "occupied"
+      }));
+      setSlots(data);
+    });
+
+    return () => unsub();
+  }, []);
+
   return (
     <Box
       sx={{
@@ -35,7 +42,6 @@ const ParkingMap = () => {
           height: 650,
           border: "5px solid #333",
           borderRadius: 3,
-          position: "relative",
           backgroundColor: "#ffffff",
           display: "flex",
           flexDirection: "column",
@@ -44,7 +50,8 @@ const ParkingMap = () => {
           boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
         }}
       >
-        {/* Các ô đỗ xe */}
+
+        {/* Parking Slots */}
         <Box
           sx={{
             display: "grid",
@@ -78,12 +85,12 @@ const ParkingMap = () => {
                 },
               }}
             >
-              {slot.id}
+              {slot.id} {/* A1, A2, A3... */}
             </Box>
           ))}
         </Box>
 
-        {/* Lối vào / ra ở giữa cạnh dưới */}
+        {/* Entry - Exit */}
         <Box
           sx={{
             display: "flex",
@@ -107,6 +114,7 @@ const ParkingMap = () => {
           >
             Exit
           </Typography>
+
           <Typography
             variant="h6"
             sx={{

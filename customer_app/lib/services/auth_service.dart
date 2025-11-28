@@ -16,7 +16,7 @@ class AuthService {
       final user = cred.user;
       if (user == null) throw Exception("User creation failed");
 
-      // 🔥 Tạo document user trong Firestore
+      // Tạo document user trong Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'email': email,
         'createdAt': FieldValue.serverTimestamp(),
