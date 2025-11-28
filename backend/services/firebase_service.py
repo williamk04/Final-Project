@@ -13,9 +13,9 @@ def now_iso():
     return now_dt().isoformat()
 
 
-# ============================================================
+
 # 1) LƯU XE VÀO — CHECK-IN
-# ============================================================
+
 def save_vehicle_entry(plate_text, image_url):
     try:
         current_dt = now_dt()

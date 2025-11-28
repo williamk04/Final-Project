@@ -11,7 +11,7 @@ import '../views/auth/register_screen.dart';
 import '../views/home/home_screen.dart';
 import '../views/settings/settings_screen.dart';
 import '../views/settings/register_vehicle_screen.dart';
-import '../views/history/history_screen.dart'; // 🆕 Thêm dòng này
+import '../views/history/history_screen.dart'; 
 
 /// Provider theo dõi trạng thái đăng nhập Firebase
 final authStateProvider = StreamProvider<User?>(

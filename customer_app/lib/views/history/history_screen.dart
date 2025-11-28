@@ -4,7 +4,7 @@ import '../../viewmodels/vehicle_viewmodel.dart';
 import '../../models/vehicle_history_model.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
+  const HistoryScreen({super.key});
 
   @override
   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
@@ -45,7 +45,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Active Session",
+                          "Active Sessions",
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
@@ -108,17 +108,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            v.imageUrl,
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                const Icon(Icons.image_not_supported, size: 60),
-          ),
-        ),
+        // ❌ Bỏ phần leading (hình ảnh)
         title: Text(
           v.licensePlate,
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -126,7 +116,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         subtitle: Text(
           isActive
               ? "Entry: ${v.entryTime}\nStatus: Active"
-              : "Exit: ${v.exitTime}\nFee: \$${v.fee ?? 0}\nDuration: ${v.durationMinutes} min",
+              : "Exit: ${v.exitTime ?? '-'}\nFee: \$${v.fee ?? 0}\nDuration: ${v.durationMinutes} min",
         ),
         trailing: isActive
             ? const Text(

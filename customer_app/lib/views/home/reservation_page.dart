@@ -28,7 +28,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
 
     final selected = DateTime(now.year, now.month, now.day, time.hour, time.minute);
     if (selected.isBefore(now)) {
-      _showMsg("Giờ bắt đầu không được nhỏ hơn hiện tại!");
+      _showMsg("The start time cannot be smaller than the present!");
       return;
     }
 
@@ -41,7 +41,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
 
   Future<void> pickEndTime() async {
     if (startTime == null) {
-      _showMsg("Hãy chọn giờ bắt đầu trước!");
+      _showMsg("Please select a start time in advance!");
       return;
     }
 
@@ -54,7 +54,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
 
     final selected = DateTime(now.year, now.month, now.day, time.hour, time.minute);
     if (selected.isBefore(startTime!)) {
-      _showMsg("Giờ kết thúc phải sau giờ bắt đầu!");
+      _showMsg("The end time must be after the start time!");
       return;
     }
 
@@ -90,14 +90,14 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
 
   Future<void> _bookSlot(ParkingSlotModel slot) async {
     if (selectedPlate == null) {
-      _showMsg("Hãy chọn biển số");
+      _showMsg("Please select a license plate number");
       return;
     }
 
     final vm = ref.read(reservationViewModelProvider.notifier);
     try {
       await vm.bookSlot(slot, selectedPlate!);
-      _showMsg("Đặt chỗ thành công!");
+      _showMsg("Booking successful!");
       setState(() {
         startTime = null;
         endTime = null;
@@ -121,7 +121,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F7),
       appBar: AppBar(
-        title: const Text("Đặt chỗ đỗ xe", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Parking Reservation", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         elevation: 0,
@@ -130,12 +130,12 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _sectionTitle("Thông tin xe"),
+            _sectionTitle("Vehicle information"),
             _infoCard(
               child: DropdownButtonFormField<String>(
                 value: selectedPlate,
                 decoration: const InputDecoration(border: InputBorder.none),
-                hint: const Text("Chọn biển số xe"),
+                hint: const Text("Select license plate number"),
                 items: vehicles.map((v) => DropdownMenuItem(value: v.plateNumber, child: Text(v.plateNumber))).toList(),
                 onChanged: (v) {
                   setState(() {
@@ -146,27 +146,27 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
               ),
             ),
             const SizedBox(height: 16),
-            _sectionTitle("Thời gian"),
+            _sectionTitle("Time"),
             _infoCard(
               child: Column(
                 children: [
-                  _timeRow(label: "Bắt đầu", value: startTime == null ? "Chọn giờ" : df.format(startTime!), onTap: pickStartTime),
+                  _timeRow(label: "Begin", value: startTime == null ? "Select time" : df.format(startTime!), onTap: pickStartTime),
                   const Divider(),
-                  _timeRow(label: "Kết thúc", value: endTime == null ? "Chọn giờ" : df.format(endTime!), onTap: pickEndTime),
+                  _timeRow(label: "End", value: endTime == null ? "Select time" : df.format(endTime!), onTap: pickEndTime),
                 ],
               ),
             ),
             if (estimatedFee != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text("Phí dự kiến: ₫$estimatedFee", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: Text("Estimated fees: ₫$estimatedFee", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             const SizedBox(height: 16),
-            _sectionTitle("Slot khả dụng"),
+            _sectionTitle("Available slots"),
             Expanded(
               flex: 2,
               child: availableSlots.isEmpty
-                  ? Center(child: Text("Không có slot trống", style: TextStyle(color: Colors.grey.shade600)))
+                  ? Center(child: Text("No available slots", style: TextStyle(color: Colors.grey.shade600)))
                   : ListView.builder(
                       itemCount: availableSlots.length,
                       itemBuilder: (context, index) {
@@ -187,7 +187,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
                   }
                   final myReservations = snapshot.data!;
                   if (myReservations.isEmpty) {
-                    return Center(child: Text("Bạn chưa có reservation nào", style: TextStyle(color: Colors.grey.shade600)));
+                    return Center(child: Text("You do not have any reservations yet", style: TextStyle(color: Colors.grey.shade600)));
                   }
                   return ListView.builder(
                     itemCount: myReservations.length,
@@ -203,7 +203,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                   onPressed: () async {
                                     await reservationVM.cancelReservation(r.id);
-                                    _showMsg("Reservation đã bị hủy");
+                                    _showMsg("Reservation has been canceled");
                                   },
                                   child: const Text("Cancel"),
                                 )
@@ -232,7 +232,7 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
               backgroundColor: Colors.blueAccent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
           onPressed: () => _bookSlot(slot),
-          child: const Text("Đặt"),
+          child: const Text("Book"),
         ),
       ),
     );

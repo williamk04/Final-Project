@@ -21,7 +21,7 @@ class SettingsScreen extends ConsumerWidget {
               icon: const Icon(Icons.directions_car),
               label: const Text("Register Vehicle Plate"),
               onPressed: () {
-                context.push('/plates'); // ✅ Dùng go_router để chuyển route
+                context.push('/plates'); 
               },
             ),
             const SizedBox(height: 15),
@@ -30,8 +30,8 @@ class SettingsScreen extends ConsumerWidget {
               label: const Text("Logout"),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
               onPressed: () async {
-                await authVM.logout(context); // gọi hàm logout Firebase
-                context.go('/login'); // ✅ Chuyển về trang login
+                await authVM.logout(context); 
+                context.go('/login'); // 
               },
             ),
           ],

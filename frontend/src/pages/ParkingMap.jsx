@@ -26,7 +26,7 @@ const ParkingMap = () => {
         variant="h4"
         sx={{ mb: 4, fontWeight: 700, textTransform: "uppercase", color: "#333" }}
       >
-        Sơ đồ giám sát bãi đỗ xe
+        Parking Map
       </Typography>
 
       <Box

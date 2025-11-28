@@ -16,12 +16,12 @@ export default function AdminRequests() {
 
   const handleApprove = async (id) => {
     await updateDoc(doc(db, "user_plates", id), { status: "approved" });
-    alert("✅ Approved successfully");
+    alert("Approved successfully");
   };
 
   const handleReject = async (id) => {
     await updateDoc(doc(db, "user_plates", id), { status: "rejected" });
-    alert("❌ Rejected successfully");
+    alert("Rejected successfully");
   };
 
   return (
