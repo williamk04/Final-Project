@@ -14,7 +14,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ✅ Gọi fetchVehicleHistories() khi widget đã sẵn sàng
+    
     Future.microtask(() async {
       await ref.read(vehicleViewModelProvider.notifier).fetchVehicleHistories();
     });
@@ -77,7 +77,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  /// 🆕 Nếu user chưa có xe được duyệt (approved), báo phù hợp
+  /// Nếu user chưa có xe được duyệt (approved), báo phù hợp
   Widget _buildEmptyState(List vehicles) {
     final approvedVehicles =
         vehicles.where((v) => v.status == 'approved').toList();
@@ -108,7 +108,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        // ❌ Bỏ phần leading (hình ảnh)
+        
         title: Text(
           v.licensePlate,
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -116,11 +116,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         subtitle: Text(
           isActive
               ? "Entry: ${v.entryTime}\nStatus: Active"
-              : "Exit: ${v.exitTime ?? '-'}\nFee: \$${v.fee ?? 0}\nDuration: ${v.durationMinutes} min",
+              : "Exit: ${v.exitTime ?? '-'}\nFee:   VND${v.fee ?? 0}\nDuration: ${v.durationMinutes} min",
         ),
         trailing: isActive
             ? const Text(
-                "\$40/hr",
+                "1000/min",
                 style: TextStyle(
                   color: Colors.blue,
                   fontWeight: FontWeight.bold,

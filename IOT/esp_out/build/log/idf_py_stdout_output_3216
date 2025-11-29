@@ -1,0 +1,69 @@
+Command: ninja all
+[1/60] Building C object esp-idf/perfmon/CMakeFiles/__idf_perfmon.dir/xtensa_perfmon_access.c.obj
+[2/60] Building C object esp-idf/perfmon/CMakeFiles/__idf_perfmon.dir/xtensa_perfmon_apis.c.obj
+[3/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/spiffs/src/spiffs_cache.c.obj
+[4/60] Building C object esp-idf/nvs_sec_provider/CMakeFiles/__idf_nvs_sec_provider.dir/nvs_sec_provider.c.obj
+[5/60] Building C object esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/diskio/diskio_sdmmc.c.obj
+[6/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/spiffs/src/spiffs_check.c.obj
+[7/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/spiffs/src/spiffs_gc.c.obj
+[8/60] Building C object esp-idf/rt/CMakeFiles/__idf_rt.dir/FreeRTOS_POSIX_utils.c.obj
+[9/60] Building C object esp-idf/mqtt/CMakeFiles/__idf_mqtt.dir/esp-mqtt/lib/mqtt_msg.c.obj
+[10/60] Building C object esp-idf/mqtt/CMakeFiles/__idf_mqtt.dir/esp-mqtt/lib/mqtt_outbox.c.obj
+[11/60] Building C object esp-idf/rt/CMakeFiles/__idf_rt.dir/FreeRTOS_POSIX_mqueue.c.obj
+[12/60] Building C object esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/vfs/vfs_fat_spiflash.c.obj
+[13/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/spiffs_api.c.obj
+[14/60] Building C object esp-idf/mqtt/CMakeFiles/__idf_mqtt.dir/esp-mqtt/lib/platform_esp32_idf.c.obj
+[15/60] Building C object esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/vfs/vfs_fat.c.obj
+[16/60] Building C object esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/vfs/vfs_fat_sdmmc.c.obj
+[17/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/spiffs/src/spiffs_nucleus.c.obj
+[18/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/spiffs/src/spiffs_hydrogen.c.obj
+[19/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/wifi_ctrl.c.obj
+[20/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/wifi_config.c.obj
+[21/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/proto-c/wifi_scan.pb-c.c.obj
+[22/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/proto-c/wifi_config.pb-c.c.obj
+[23/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/proto-c/wifi_ctrl.pb-c.c.obj
+[24/60] Linking C static library esp-idf\Servo\libServo.a
+[25/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/proto-c/wifi_constants.pb-c.c.obj
+[26/60] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/esp_out.c.obj
+[27/60] Building C object esp-idf/spiffs/CMakeFiles/__idf_spiffs.dir/esp_spiffs.c.obj
+[28/60] Linking C static library esp-idf\app_trace\libapp_trace.a
+[29/60] Linking C static library esp-idf\cmock\libcmock.a
+[30/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/wifi_scan.c.obj
+[31/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/scheme_console.c.obj
+[32/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/handlers.c.obj
+[33/60] Building C object esp-idf/mqtt/CMakeFiles/__idf_mqtt.dir/esp-mqtt/mqtt_client.c.obj
+[34/60] Linking C static library esp-idf\esp_driver_cam\libesp_driver_cam.a
+[35/60] Linking C static library esp-idf\esp_driver_touch_sens\libesp_driver_touch_sens.a
+[36/60] Linking C static library esp-idf\esp_hid\libesp_hid.a
+[37/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/manager.c.obj
+[38/60] Building C object esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/scheme_softap.c.obj
+[39/60] Linking C static library esp-idf\esp_local_ctrl\libesp_local_ctrl.a
+[40/60] Linking C static library esp-idf\esp_eth\libesp_eth.a
+[41/60] Linking C static library esp-idf\esp_lcd\libesp_lcd.a
+[42/60] Linking C static library esp-idf\espcoredump\libespcoredump.a
+[43/60] Linking C static library esp-idf\nvs_sec_provider\libnvs_sec_provider.a
+[44/60] Linking C static library esp-idf\perfmon\libperfmon.a
+[45/60] Linking C static library esp-idf\rt\librt.a
+[46/60] Linking C static library esp-idf\fatfs\libfatfs.a
+[47/60] Linking C static library esp-idf\mqtt\libmqtt.a
+[48/60] Linking C static library esp-idf\spiffs\libspiffs.a
+[49/60] Linking C static library esp-idf\wifi_provisioning\libwifi_provisioning.a
+[50/60] Performing build step for 'bootloader'
+[1/1] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\Dell\Documents\ESPIDF\TheDuong_Project\esp_out\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/Users/Dell/Documents/ESPIDF/TheDuong_Project/esp_out/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6680 bytes. 0x980 bytes (8%) free.
+[51/60] No install step for 'bootloader'
+[52/60] Building C object esp-idf/Camera/CMakeFiles/__idf_Camera.dir/Camera.c.obj
+[53/60] Completed 'bootloader'
+[54/60] Linking C static library esp-idf\Camera\libCamera.a
+[55/60] Linking C static library esp-idf\main\libmain.a
+[56/60] Generating esp-idf/esp_system/ld/sections.ld
+[57/60] Building C object CMakeFiles/esp_out.elf.dir/project_elf_src_esp32.c.obj
+[58/60] Linking CXX executable esp_out.elf
+[59/60] Generating binary image from built executable
+esptool.py v4.10.0
+Creating esp32 image...
+Merged 2 ELF sections
+Successfully created esp32 image.
+Generated C:/Users/Dell/Documents/ESPIDF/TheDuong_Project/esp_out/build/esp_out.bin
+[60/60] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\Dell\Documents\ESPIDF\TheDuong_Project\esp_out\build\esp-idf\esptool_py && C:\Espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/Users/Dell/Documents/ESPIDF/TheDuong_Project/esp_out/build/partition_table/partition-table.bin C:/Users/Dell/Documents/ESPIDF/TheDuong_Project/esp_out/build/esp_out.bin"
+esp_out.bin binary size 0x2c2d0 bytes. Smallest app partition is 0x100000 bytes. 0xd3d30 bytes (83%) free.
